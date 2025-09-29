@@ -19,16 +19,16 @@ speech_client = None
 tts_client = None
 
 # Khởi tạo model AI khi ứng dụng khởi động
-# Đây là nơi quan trọng nhất để kiểm tra lỗi cấu hình AI
+model = None
 try:
     genai.configure(api_key=settings.GOOGLE_API_KEY)
     
-    # SỬA LẠI TÊN MODEL THÀNH 'gemini-pro'
-    model = genai.GenerativeModel('gemini-pro')
+    # SỬA LẠI TÊN MODEL THÀNH PHIÊN BẢN TƯƠNG THÍCH NHẤT
+    model = genai.GenerativeModel('gemini-1.0-pro')
     
     # In ra xác nhận nếu model được khởi tạo thành công
     if model:
-        print("INFO: Mô hình Gemini AI đã được cấu hình thành công.")
+        print("INFO: Mô hình Gemini AI đã được cấu hình thành công với 'gemini-1.0-pro'.")
     
 except Exception as e:
     # In ra lỗi cụ thể từ Gemini API hoặc quá trình cấu hình
