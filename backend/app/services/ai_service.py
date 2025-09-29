@@ -23,7 +23,7 @@ model = None
 try:
     genai.configure(api_key=settings.GOOGLE_API_KEY)
     
-    # SỬA LẠI TÊN MODEL THÀNH PHIÊN BẢN TƯƠNG THÍCH NHẤT
+    # SỬA LẠI Ở ĐÂY: Dùng model 'gemini-1.0-pro' để đảm bảo tương thích tối đa
     model = genai.GenerativeModel('gemini-1.0-pro')
     
     # In ra xác nhận nếu model được khởi tạo thành công
@@ -147,7 +147,8 @@ def analyze_lab_result_image(image_bytes: bytes, file_type: str, test_type: Opti
             recommendations=analysis_data.get("recommendations", [])
         ).dict()
     except json.JSONDecodeError as e:
-        print(f"LỖI PHÂN TÍCH JSON TỪ AI (Lab Result): {e} - Phản hồi thô: {response.text}")
+        # Sửa lỗi unbound variable 'response'
+        print(f"LỖI PHÂN TÍCH JSON TỪ AI (Lab Result): {e}")
         raise HTTPException(status_code=500, detail="Lỗi phân tích kết quả từ AI. Định dạng phản hồi không hợp lệ.")
     except Exception as e:
         print(f"LỖI GỌI API GEMINI (Lab Result): {e}")
@@ -193,7 +194,8 @@ def analyze_symptoms(request_data: dict) -> Dict:
             "disclaimer": "Gợi ý này chỉ mang tính tham khảo và không thể thay thế cho chẩn đoán của bác sĩ. Vui lòng đến cơ sở y tế để được thăm khám."
         }
     except json.JSONDecodeError as e:
-        print(f"LỖI PHÂN TÍCH JSON TỪ AI (Symptom Analysis): {e} - Phản hồi thô: {response.text}")
+        # Sửa lỗi unbound variable 'response'
+        print(f"LỖI PHÂN TÍCH JSON TỪ AI (Symptom Analysis): {e}")
         return { "recommended_specialties": [], "potential_info": "Lỗi phân tích kết quả. Định dạng phản hồi không hợp lệ.", "disclaimer": ""}
     except Exception as e:
         print(f"LỖI GỌI API GEMINI (Symptom Analysis): {e}")
@@ -276,7 +278,8 @@ def generate_prescription(request_data: dict) -> Dict:
             price_disclaimer=analysis_data.get("price_disclaimer", "Lưu ý: Giá thuốc chỉ mang tính chất tham khảo tại thời điểm hiện tại và có thể thay đổi tùy thuộc vào nhà cung cấp và địa điểm.") # NEW: Ánh xạ price_disclaimer
         ).dict()
     except json.JSONDecodeError as e:
-        print(f"LỖI PHÂN TÍCH JSON TỪ AI (Prescription): {e} - Phản hồi thô: {response.text}")
+        # Sửa lỗi unbound variable 'response'
+        print(f"LỖI PHÂN TÍCH JSON TỪ AI (Prescription): {e}")
         raise HTTPException(status_code=500, detail="Lỗi phân tích kết quả từ AI. Định dạng phản hồi không hợp lệ.")
     except Exception as e:
         print(f"LỖI GỌI API GEMINI (Prescription): {e}")
