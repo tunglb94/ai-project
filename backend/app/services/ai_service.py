@@ -22,7 +22,12 @@ tts_client = None
 # Đây là nơi quan trọng nhất để kiểm tra lỗi cấu hình AI
 try:
     genai.configure(api_key=settings.GOOGLE_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    
+    # SỬA LẠI Ở ĐÂY: Khai báo generation_config ngay lúc khởi tạo model
+    model = genai.GenerativeModel(
+        'gemini-1.5-flash',
+        generation_config={"response_mime_type": "application/json"}
+    )
     
     # In ra xác nhận nếu model được khởi tạo thành công
     if model:
@@ -41,7 +46,10 @@ def get_ai_chat_response(query: str) -> str:
     
     prompt = f"Bạn là một trợ lý y tế AI tên là Doctor AI. Nhiệm vụ của bạn là cung cấp thông tin tham khảo, dễ hiểu từ các kiến thức y khoa phổ thông. Người dùng hỏi: \"{query}\". Câu trả lời của bạn:"
     try:
-        response = model.generate_content(prompt)
+        # LƯU Ý: Với get_ai_chat_response, chúng ta muốn trả về text, không phải JSON
+        # Nên chúng ta sẽ dùng một model riêng không có cấu hình JSON
+        chat_model = genai.GenerativeModel('gemini-1.5-flash')
+        response = chat_model.generate_content(prompt)
         disclaimer = "\n\n---Lưu ý: Thông tin này chỉ mang tính chất tham khảo, không thay thế cho việc chẩn đoán và tư vấn của bác sĩ chuyên khoa."
         return response.text + disclaimer
     except Exception as e:
@@ -122,7 +130,8 @@ def analyze_lab_result_image(image_bytes: bytes, file_type: str, test_type: Opti
         contents = [input_content] + prompt_parts
 
     try:
-        response = model.generate_content(contents, generation_config={"response_mime_type": "application/json"})
+        # SỬA LẠI Ở ĐÂY: Xóa generation_config vì đã khai báo ở trên
+        response = model.generate_content(contents)
         raw_json_str = response.text.strip().replace("```json", "").replace("```", "")
         analysis_data = json.loads(raw_json_str)
 
@@ -148,7 +157,7 @@ def analyze_lab_result_image(image_bytes: bytes, file_type: str, test_type: Opti
         print(f"LỖI PHÂN TÍCH JSON TỪ AI (Lab Result): {e} - Phản hồi thô: {response.text}")
         raise HTTPException(status_code=500, detail="Lỗi phân tích kết quả từ AI. Định dạng phản hồi không hợp lệ.")
     except Exception as e:
-        print(f"LỖI GỌC API GEMINI (Lab Result): {e}")
+        print(f"LỖI GỌI API GEMINI (Lab Result): {e}")
         raise HTTPException(status_code=500, detail=f"Đã có lỗi xảy ra trong quá trình phân tích: {e}")
 
 
@@ -181,7 +190,8 @@ def analyze_symptoms(request_data: dict) -> Dict:
     final_prompt = "\n".join(prompt_parts)
 
     try:
-        response = model.generate_content(final_prompt, generation_config={"response_mime_type": "application/json"})
+        # SỬA LẠI Ở ĐÂY: Xóa generation_config vì đã khai báo ở trên
+        response = model.generate_content(final_prompt)
         raw_json_str = response.text.strip().replace("```json", "").replace("```", "")
         analysis_data = json.loads(raw_json_str)
 
@@ -194,7 +204,7 @@ def analyze_symptoms(request_data: dict) -> Dict:
         print(f"LỖI PHÂN TÍCH JSON TỪ AI (Symptom Analysis): {e} - Phản hồi thô: {response.text}")
         return { "recommended_specialties": [], "potential_info": "Lỗi phân tích kết quả. Định dạng phản hồi không hợp lệ.", "disclaimer": ""}
     except Exception as e:
-        print(f"LỖI GỌC API GEMINI (Symptom Analysis): {e}")
+        print(f"LỖI GỌI API GEMINI (Symptom Analysis): {e}")
         return { "recommended_specialties": [], "potential_info": "Đã có lỗi xảy ra trong quá trình phân tích.", "disclaimer": ""}
 
 # Function to generate prescription
@@ -250,7 +260,8 @@ def generate_prescription(request_data: dict) -> Dict:
     final_prompt = "\n".join(prompt_parts)
 
     try:
-        response = model.generate_content(final_prompt, generation_config={"response_mime_type": "application/json"})
+        # SỬA LẠI Ở ĐÂY: Xóa generation_config vì đã khai báo ở trên
+        response = model.generate_content(final_prompt)
         raw_json_str = response.text.strip().replace("```json", "").replace("```", "")
         analysis_data = json.loads(raw_json_str)
 
@@ -277,5 +288,5 @@ def generate_prescription(request_data: dict) -> Dict:
         print(f"LỖI PHÂN TÍCH JSON TỪ AI (Prescription): {e} - Phản hồi thô: {response.text}")
         raise HTTPException(status_code=500, detail="Lỗi phân tích kết quả từ AI. Định dạng phản hồi không hợp lệ.")
     except Exception as e:
-        print(f"LỖI GỌC API GEMINI (Prescription): {e}")
+        print(f"LỖI GỌI API GEMINI (Prescription): {e}")
         raise HTTPException(status_code=500, detail=f"Đã có lỗi xảy ra trong quá trình kê đơn: {e}")
