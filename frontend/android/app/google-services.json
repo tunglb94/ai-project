@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "636776316099",
+    "project_id": "doctoc-ai",
+    "storage_bucket": "doctoc-ai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:636776316099:android:daaa05b8cd4c1ea6e8b676",
+        "android_client_info": {
+          "package_name": "com.doctorai.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "636776316099-ukbmhq2h3i1aeurp39mckr9i3np89a34.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.doctorai.app",
+            "certificate_hash": "310df48f47762681280138305c572f5731b449f6"
+          }
+        },
+        {
+          "client_id": "636776316099-o3ndj2fdkcisuug3vjghem5t3bhq8hqa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8oCMILzBshFdf-P1BTfZjupRRl3UATZ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "636776316099-o3ndj2fdkcisuug3vjghem5t3bhq8hqa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
