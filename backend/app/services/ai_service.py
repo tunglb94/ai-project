@@ -1,4 +1,4 @@
-# clone/backend/app/services/ai_service.py
+# app/services/ai_service.py
 
 import google.generativeai as genai
 from app.core.config import settings
@@ -23,12 +23,12 @@ model = None
 try:
     genai.configure(api_key=settings.GOOGLE_API_KEY)
     
-    # SỬA LẠI Ở ĐÂY: Dùng model 'gemini-1.0-pro' để đảm bảo tương thích tối đa
-    model = genai.GenerativeModel('gemini-1.0-pro')
+    # SỬA LỖI: Dùng model 'gemini-1.5-flash', là model mới, nhanh và hiệu quả.
+    model = genai.GenerativeModel('gemini-1.5-flash')
     
     # In ra xác nhận nếu model được khởi tạo thành công
     if model:
-        print("INFO: Mô hình Gemini AI đã được cấu hình thành công với 'gemini-1.0-pro'.")
+        print("INFO: Mô hình Gemini AI đã được cấu hình thành công với 'gemini-1.5-flash'.")
     
 except Exception as e:
     # In ra lỗi cụ thể từ Gemini API hoặc quá trình cấu hình
@@ -147,8 +147,7 @@ def analyze_lab_result_image(image_bytes: bytes, file_type: str, test_type: Opti
             recommendations=analysis_data.get("recommendations", [])
         ).dict()
     except json.JSONDecodeError as e:
-        # Sửa lỗi unbound variable 'response'
-        print(f"LỖI PHÂN TÍCH JSON TỪ AI (Lab Result): {e}")
+        print(f"LỖI PHÂN TÍCH JSON TỪ AI (Lab Result): {e} - Phản hồi thô: {raw_json_str}")
         raise HTTPException(status_code=500, detail="Lỗi phân tích kết quả từ AI. Định dạng phản hồi không hợp lệ.")
     except Exception as e:
         print(f"LỖI GỌI API GEMINI (Lab Result): {e}")
@@ -156,14 +155,13 @@ def analyze_lab_result_image(image_bytes: bytes, file_type: str, test_type: Opti
 
 
 def analyze_symptoms(request_data: dict) -> Dict:
-    # Kiểm tra xem mô hình AI đã được cấu hình thành công hay chưa
     if model is None:
         print("LỖI: Gọi AI Phân tích triệu chứng khi model chưa được cấu hình.")
         return { "recommended_specialties": [], "potential_info": "Lỗi: Dịch vụ AI chưa được cấu hình đúng. Vui lòng kiểm tra GOOGLE_API_KEY và log backend.", "disclaimer": ""}
 
     prompt_parts = [
         "Bạn là một trợ lý y tế AI tên là Doctor AI. Nhiệm vụ của bạn là định hướng người dùng đến đúng chuyên khoa y tế dựa trên các thông tin họ cung cấp.",
-        "Dựa trên các triệu chứng và thông tin bệnh sử được cung cấp, hãy đưa ra một phân tích chi tiết, toàn diện. Phần 'thông_tin_tiem_nang' cần phải thật dài, chi tiết và có cấu trúc mạch lạc, bao gồm các phần như mô tả về các bệnh lý tiềm ẩn, các yếu tố nguy hiểm, và các lời khuyên ban đầu về cách tự chăm sóc hoặc khi nào cần thăm khám bác sĩ. Đừng chỉ liệt kê các bệnh, mà hãy giải thích ngắn gọn từng khả năng."
+        "Dựa trên các triệu chứng và thông tin bệnh sử được cung cấp, hãy đưa ra một phân tích chi tiết, toàn diện. Phần 'potential_info' cần phải thật dài, chi tiết và có cấu trúc mạch lạc, bao gồm các phần như mô tả về các bệnh lý tiềm ẩn, các yếu tố nguy hiểm, và các lời khuyên ban đầu về cách tự chăm sóc hoặc khi nào cần thăm khám bác sĩ. Đừng chỉ liệt kê các bệnh, mà hãy giải thích ngắn gọn từng khả năng."
     ]
     prompt_parts.append(f"Triệu chứng chính: {request_data.get('symptoms_description')}")
     if request_data.get('department'):
@@ -194,16 +192,14 @@ def analyze_symptoms(request_data: dict) -> Dict:
             "disclaimer": "Gợi ý này chỉ mang tính tham khảo và không thể thay thế cho chẩn đoán của bác sĩ. Vui lòng đến cơ sở y tế để được thăm khám."
         }
     except json.JSONDecodeError as e:
-        # Sửa lỗi unbound variable 'response'
-        print(f"LỖI PHÂN TÍCH JSON TỪ AI (Symptom Analysis): {e}")
-        return { "recommended_specialties": [], "potential_info": "Lỗi phân tích kết quả. Định dạng phản hồi không hợp lệ.", "disclaimer": ""}
+        print(f"LỖI PHÂN TÍCH JSON TỪ AI (Symptom Analysis): {e} - Phản hồi thô: {raw_json_str}")
+        raise HTTPException(status_code=500, detail="Lỗi phân tích kết quả. Định dạng phản hồi không hợp lệ.")
     except Exception as e:
         print(f"LỖI GỌI API GEMINI (Symptom Analysis): {e}")
-        return { "recommended_specialties": [], "potential_info": "Đã có lỗi xảy ra trong quá trình phân tích.", "disclaimer": ""}
+        raise HTTPException(status_code=500, detail=f"Đã có lỗi xảy ra trong quá trình phân tích: {e}")
 
 # Function to generate prescription
 def generate_prescription(request_data: dict) -> Dict:
-    # Kiểm tra xem mô hình AI đã được cấu hình thành công hay chưa
     if model is None:
         print("LỖI: Gọi AI Kê đơn khi model chưa được cấu hình.")
         return {
@@ -214,7 +210,6 @@ def generate_prescription(request_data: dict) -> Dict:
             "price_disclaimer": "Lưu ý: Giá thuốc chỉ mang tính chất tham khảo tại thời điểm hiện tại và có thể thay đổi tùy thuộc vào nhà cung cấp và địa điểm."
         }
 
-    # Xây dựng prompt chi tiết cho mô hình AI
     prompt_parts = [
         "Bạn là một trợ lý y tế AI tên là Doctor AI, chuyên hỗ trợ kê đơn thuốc dựa trên thông tin bệnh lý đã được bác sĩ chẩn đoán. Mục tiêu là cung cấp một đơn thuốc tham khảo, ưu tiên các loại thuốc phổ biến ở Việt Nam và **hạn chế kê thuốc kháng sinh** trừ khi thật sự cần thiết cho bệnh lý cụ thể.",
         "Thông tin bệnh nhân và chẩn đoán:",
@@ -258,7 +253,6 @@ def generate_prescription(request_data: dict) -> Dict:
         raw_json_str = response.text.strip().replace("```json", "").replace("```", "")
         analysis_data = json.loads(raw_json_str)
 
-        # Ánh xạ dữ liệu JSON sang PrescriptionResponse schema
         prescription_drugs = [
             ai_schema.PrescriptionDrug(
                 drug_name=item.get("drug_name", "N/A"),
@@ -266,7 +260,7 @@ def generate_prescription(request_data: dict) -> Dict:
                 frequency=item.get("frequency", "N/A"),
                 duration=item.get("duration", "N/A"),
                 notes=item.get("notes"),
-                estimated_price=item.get("estimated_price") # NEW: Ánh xạ estimated_price
+                estimated_price=item.get("estimated_price")
             ) for item in analysis_data.get("drugs", []) if isinstance(item, dict)
         ]
 
@@ -275,11 +269,10 @@ def generate_prescription(request_data: dict) -> Dict:
             drugs=prescription_drugs,
             general_advice=analysis_data.get("general_advice"),
             disclaimer=analysis_data.get("disclaimer", "Lưu ý: Đơn thuốc này chỉ mang tính chất tham khảo. Vui lòng tham khảo ý kiến bác sĩ hoặc dược sĩ trước khi sử dụng bất kỳ loại thuốc nào."),
-            price_disclaimer=analysis_data.get("price_disclaimer", "Lưu ý: Giá thuốc chỉ mang tính chất tham khảo tại thời điểm hiện tại và có thể thay đổi tùy thuộc vào nhà cung cấp và địa điểm.") # NEW: Ánh xạ price_disclaimer
+            price_disclaimer=analysis_data.get("price_disclaimer", "Lưu ý: Giá thuốc chỉ mang tính chất tham khảo tại thời điểm hiện tại và có thể thay đổi tùy thuộc vào nhà cung cấp và địa điểm.")
         ).dict()
     except json.JSONDecodeError as e:
-        # Sửa lỗi unbound variable 'response'
-        print(f"LỖI PHÂN TÍCH JSON TỪ AI (Prescription): {e}")
+        print(f"LỖI PHÂN TÍCH JSON TỪ AI (Prescription): {e} - Phản hồi thô: {raw_json_str}")
         raise HTTPException(status_code=500, detail="Lỗi phân tích kết quả từ AI. Định dạng phản hồi không hợp lệ.")
     except Exception as e:
         print(f"LỖI GỌI API GEMINI (Prescription): {e}")
