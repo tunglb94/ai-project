@@ -1,10 +1,9 @@
 # app/main.py
-
 from fastapi import FastAPI
 from app.db import database
 from app.api.v1.api import api_router
+from fastapi.middleware.cors import CORSMiddleware # <--- IMPORT MỚI
 
-# Tạo các bảng trong database (nếu chúng chưa tồn tại)
 database.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI(
@@ -13,7 +12,16 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Include router của API v1
+# Cấu hình CORS  <--- THÊM KHỐI NÀY
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(api_router, prefix="/api/v1")
 
 @app.get("/", tags=["Root"])
