@@ -6,7 +6,7 @@ pydantic-settings # Để quản lý config
 python-dotenv     # Để đọc file .env
 passlib[bcrypt]   # Để mã hóa mật khẩu
 python-jose[cryptography] # Để tạo và xác thực JWT token
-google-generativeai # Thư viện chính thức của Google cho Gemini API
+google-generativeai>=0.8.5 # Thư viện chính thức của Google cho Gemini API
 email-validator
 python-multipart # Thêm dòng này
 Pillow
