@@ -1,23 +1,19 @@
 services:
   - type: web
-    name: ai-project-backend # Bạn có thể đặt tên khác nếu muốn
+    name: ai-project-backend
     env: python
     region: singapore
     plan: free
     branch: main
     
-    # === Cấu hình build & chạy ===
+    # === Cấu hình build & chạy (Đã chính xác) ===
     rootDir: ./backend
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port 10000"
 
-    # === Biến môi trường ===
-    # LƯU Ý: Không điền trực tiếp key vào đây. 
-    # Chúng ta sẽ thêm nó trên giao diện web cho bảo mật.
+    # === SỬA LẠI PHẦN NÀY ===
+    # Khai báo các key mà Render sẽ hỏi bạn trên giao diện web
     envVars:
       - key: GOOGLE_API_KEY
-        fromSecret: true
       - key: SQLALCHEMY_DATABASE_URL
-        fromSecret: true
       - key: SECRET_KEY
-        fromSecret: true
