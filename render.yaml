@@ -1,21 +1,26 @@
 services:
+  # Service cho Backend
   - type: web
     name: ai-project-backend
-    env: python
+    runtime: python
     region: singapore
     plan: free
-    branch: main
-    
-    # === Cấu hình build & chạy (Đã chính xác) ===
-    rootDir: ./backend
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port 10000"
+    envVars:
+      - key: SQLALCHEMY_DATABASE_URL
+        fromDatabase:
+          name: ai-project-db
+          property: connectionString
+      - key: GOOGLE_API_KEY
+        value: AIzaSyALQkMTzmciT70p_TzGHxGVTZNrp38AYlQ # Key API mới nhất của bạn
+      - key: SECRET_KEY
+        generateValue: true # Render sẽ tự động tạo một chuỗi bí mật an toàn
+      - key: PYTHONPATH
+        value: /opt/render/project/src/backend # Thêm PYTHONPATH để Python tìm thấy module 'app'
 
-# CÁCH ĐÚNG
-envVars:
-  - key: SQLALCHEMY_DATABASE_URL
-    value: postgresql://doctor_ai_db_hv1c_user:IzH5epRUR5zoiLDUIhe6Ro49q7HopyJt@dpg-d3d1r756ubrc73f7m4p0-a/doctor_ai_db_hv1c
-  - key: GOOGLE_API_KEY
-    value: AIzaSyALQkMTzmciT70p_TzGHxGVTZNrp38AYlQ
-  - key: SECRET_KEY
-    value: DayLaChuoiBiMatCuaToi_KhoMaDoanLam_@2025! # Thay bằng key của bạn
+databases:
+  # Database cho dự án
+  - name: ai-project-db
+    region: singapore
+    plan: free
