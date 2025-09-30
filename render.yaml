@@ -11,9 +11,11 @@ services:
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port 10000"
 
-    # === SỬA LẠI PHẦN NÀY ===
-    # Khai báo các key mà Render sẽ hỏi bạn trên giao diện web
-    envVars:
-      - key: GOOGLE_API_KEY
-      - key: SQLALCHEMY_DATABASE_URL
-      - key: SECRET_KEY
+# CÁCH ĐÚNG
+envVars:
+  - key: SQLALCHEMY_DATABASE_URL
+    value: postgresql://doctor_ai_db_hv1c_user:IzH5epRUR5zoiLDUIhe6Ro49q7HopyJt@dpg-d3d1r756ubrc73f7m4p0-a/doctor_ai_db_hv1c
+  - key: GOOGLE_API_KEY
+    value: AIzaSyALQkMTzmciT70p_TzGHxGVTZNrp38AYlQ
+  - key: SECRET_KEY
+    value: DayLaChuoiBiMatCuaToi_KhoMaDoanLam_@2025! # Thay bằng key của bạn
